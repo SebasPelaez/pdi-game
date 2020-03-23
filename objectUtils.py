@@ -51,6 +51,9 @@ def _find_object_coordinates(frame,fit_idx):
 
 def identify_object(frame):
 
+	point_one = tuple()
+	point_two = tuple()
+
 	height,width,chanels = frame.shape 
 
 	_ , _ , _ , _ , _ , red_LAB =fun.componentes(frame)
@@ -58,9 +61,7 @@ def identify_object(frame):
 	bin_frame = _binarize_frame(frame,red_LAB,height,width)
 	area,fit_idx = _compute_frame_area(bin_frame)
 
-	print(area)
 	if area >= 1090:
 		point_one, point_two = _find_object_coordinates(bin_frame,fit_idx)
-		frame = cv2.rectangle(frame,point_one,point_two,(0, 255, 0),4)
 
-	return frame
+	return point_one, point_two
