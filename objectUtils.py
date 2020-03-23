@@ -53,6 +53,7 @@ def identify_object(frame):
 
 	point_one = tuple()
 	point_two = tuple()
+	half_point = tuple()
 
 	height,width,chanels = frame.shape 
 
@@ -63,5 +64,8 @@ def identify_object(frame):
 
 	if area >= 1090:
 		point_one, point_two = _find_object_coordinates(bin_frame,fit_idx)
+		x_half = int((point_one[0]+point_two[0])/2)
+		y_half = int((point_one[1]+point_two[1])/2)
+		half_point = (x_half,y_half)
 
-	return point_one, point_two
+	return point_one, point_two, half_point

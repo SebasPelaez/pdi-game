@@ -50,12 +50,14 @@ while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
    
-    object_point_one, object_point_two = objectUtils.identify_object(frame)
+    object_point_one, object_point_two, object_half_point = objectUtils.identify_object(frame)
 
     if ((object_point_one and object_point_two) and
      (object_point_one[0] >= MENU_LIMIT_AREA and object_point_two[0] >= MENU_LIMIT_AREA)):
 
     	frame = cv2.rectangle(frame,object_point_one,object_point_two,(0, 255, 0),4)
+    	frame = cv2.circle(frame, object_half_point, 10, (0,255,0), -1)
+    	cv2.circle(paintWindow, object_half_point, 10, (0,255,0), -1)
 
     frame = delimit_screen(frame)
     cv2.imshow('frame',frame)
