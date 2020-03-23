@@ -58,13 +58,9 @@ def identify_object(frame):
 	bin_frame = _binarize_frame(frame,red_LAB,height,width)
 	area,fit_idx = _compute_frame_area(bin_frame)
 
-	point_one, point_two = _find_object_coordinates(bin_frame,fit_idx)
+	print(area)
+	if area >= 1090:
+		point_one, point_two = _find_object_coordinates(bin_frame,fit_idx)
+		frame = cv2.rectangle(frame,point_one,point_two,(0, 255, 0),4)
 
-	frame = cv2.rectangle(frame,point_one,point_two,(0, 255, 0),4)
-
-	cv2.imshow('Placa a color',frame)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
-
-frame = cv2.imread("foto.jpg")
-identify_object(frame)
+	return frame
