@@ -19,7 +19,9 @@ def _pixel_counter():
 	image_border_painted_path = os.path.join('Imagenes','Generadas','paint_border.jpg')
 	image_original = cv2.imread(image_border_original_path)
 	image_painted = cv2.imread(image_border_painted_path)
-	image_painted = image_painted[80:,:]
+	#image_painted = image_painted[80:,:]
+
+	image_original = cv2.resize(image_original,(600,470))
 	image_painted = cv2.resize(image_painted,(600,470))
 
 	image_intersection = cv2.bitwise_and(image_original,image_painted)
@@ -126,10 +128,13 @@ while(True):
     cv2.imshow('frame',frame)
     cv2.imshow("Paint", paintWindow)
     if cv2.waitKey(20) & 0xFF == ord('q'):
-		_get_border_image(frame, 'frame')
-		_get_border_image(paintWindow, 'paint')
-		break
+    	_get_border_image(paint_window=frame, image_name='frame')
+    	_get_border_image(paint_window=paintWindow, image_name='paint')
+    	break
 
+
+contador_pixeles = _pixel_counter()
+print(contador_pixeles)
 # When everything done, release the capture
 cap.release()
 cv2.destroyAllWindows()
