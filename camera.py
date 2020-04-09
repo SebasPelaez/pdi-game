@@ -1,8 +1,32 @@
 import numpy as np
 import cv2
 import objectUtils
+import os
 
 MENU_LIMIT_AREA = 150
+
+def _get_border_image(paint_window, image_name):
+	image_path = os.path.join('Imagenes','Generadas','{}.jpg'.format(image_name))
+	image_border_path = os.path.join('Imagenes','Generadas','{}_border.jpg'.format(image_name))
+	cv2.imwrite(image_path,paint_window)
+	image = cv2.imread(image_path,1)
+	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+	border = cv2.Canny(gray,100,200)
+	cv2.imwrite(image_border_path,border)
+	
+def _pixel_counter():
+	image_border_original_path = os.path.join('Imagenes','Generadas','frame_border.jpg')
+	image_border_painted_path = os.path.join('Imagenes','Generadas','paint_border.jpg')
+	image_original = cv2.imread(image_border_original_path)
+	image_painted = cv2.imread(image_border_painted_path)
+	image_painted = image_painted[80:,:]
+	image_painted = cv2.resize(image_painted,(600,470))
+
+	image_intersection = cv2.bitwise_and(image_original,image_painted)
+	_,image_binarized = cv2.threshold(image_intersection, 170, 255, cv2.THRESH_BINARY) #investigar después porque 170
+
+	mask = image_binarized == 255
+	return np.sum(mask)
 
 def delimit_screen(frame):
 	start_point = (MENU_LIMIT_AREA,0)
@@ -102,7 +126,9 @@ while(True):
     cv2.imshow('frame',frame)
     cv2.imshow("Paint", paintWindow)
     if cv2.waitKey(20) & 0xFF == ord('q'):
-        break
+		_get_border_image(frame, 'frame')
+		_get_border_image(paintWindow, 'paint')
+		break
 
 # When everything done, release the capture
 cap.release()
