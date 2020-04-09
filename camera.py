@@ -30,6 +30,15 @@ def _pixel_counter():
 	mask = image_binarized == 255
 	return np.sum(mask)
 
+def _get_draw_image():
+	images = os.listdir(os.path.join('Imagenes','Dibujos'))
+	random = np.random.randint(0,len(images))
+
+	random_image_path = os.path.join('Imagenes','Dibujos',images[random])
+	random_image = cv2.imread(random_image_path)
+
+	return random_image
+
 def delimit_screen(frame):
 	start_point = (MENU_LIMIT_AREA,0)
 	end_point = (MENU_LIMIT_AREA,500)
@@ -79,6 +88,7 @@ color_idx = 0
 brush_idx = 0
 
 paintWindow = np.zeros((471,636,3)) + 255
+paintWindow = _get_draw_image()
 paintWindow = _paint_menu(paintWindow,colors)
 paintWindow = _paint_rules(paintWindow,colors,color_idx,brushes,brush_idx)
 cv2.namedWindow('Paint', cv2.WINDOW_AUTOSIZE)
