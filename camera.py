@@ -57,8 +57,8 @@ def _paint_menu(window,colors):
 	window = cv2.rectangle(window, (10,162), (140,202), colors[2], -1)
 	window = cv2.rectangle(window, (10,209), (140,249), colors[3], -1)
 
-	window = cv2.circle(window, (75,275), 10, (0,0,0), -1)
-	window = cv2.circle(window, (75,315), 20, (0,0,0), -1)
+	window = cv2.circle(window, (75,275), 5, (0,0,0), -1)
+	window = cv2.circle(window, (75,315), 8, (0,0,0), -1)
 	window = cv2.circle(window, (75,375), 30, (0,0,0), -1)
 
 	cv2.putText(window, "AZUL", (55, 92), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
@@ -83,7 +83,7 @@ def _paint_rules(window,colors,idx,brushes,brush_idx):
 	return window
 
 colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (0, 255, 255)]
-brushes = [10,20,30]
+brushes = [5,8,30]
 color_idx = 0
 brush_idx = 0
 
