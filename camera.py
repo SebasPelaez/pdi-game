@@ -4,31 +4,70 @@ import objectUtils
 import os
 
 MENU_LIMIT_AREA = 150
+PAINT_WINDOW_SHAPE = (620,426)
 
 def _get_border_image(paint_window, image_name):
-	image_path = os.path.join('Imagenes','Generadas','{}.jpg'.format(image_name))
-	image_border_path = os.path.join('Imagenes','Generadas','{}_border.jpg'.format(image_name))
+
+	folder_images_path = os.path.join('Imagenes','Generadas')
+
+	if not os.path.exists(folder_images_path):
+	    os.makedirs(folder_images_path)
+
+	image_path = os.path.join(folder_images_path,'{}.jpg'.format(image_name))
+	image_border_path = os.path.join(folder_images_path,'{}_border.jpg'.format(image_name))
+	
 	cv2.imwrite(image_path,paint_window)
 	image = cv2.imread(image_path,1)
+	
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	border = cv2.Canny(gray,100,200)
+	
 	cv2.imwrite(image_border_path,border)
 	
-def _pixel_counter():
-	image_border_original_path = os.path.join('Imagenes','Generadas','frame_border.jpg')
-	image_border_painted_path = os.path.join('Imagenes','Generadas','paint_border.jpg')
+def _compute_score():
+	image_border_original_path = os.path.join('Imagenes','Generadas','unpainted_image_border.jpg')
+	image_border_painted_path = os.path.join('Imagenes','Generadas','painted_image_border.jpg')
 	image_original = cv2.imread(image_border_original_path)
 	image_painted = cv2.imread(image_border_painted_path)
-	#image_painted = image_painted[80:,:]
 
-	image_original = cv2.resize(image_original,(600,470))
-	image_painted = cv2.resize(image_painted,(600,470))
+	image_original = image_original[30:,150:]
+	image_painted = image_painted[30:,150:]
 
-	image_intersection = cv2.bitwise_and(image_original,image_painted)
-	_,image_binarized = cv2.threshold(image_intersection, 170, 255, cv2.THRESH_BINARY) #investigar después porque 170
+	image_intersection = _get_overlap(image_original,image_painted)
+	image_union = _get_union(image_original,image_painted)
 
+	pixels_in_original = _count_pixels_in_binarized_images(image_original)
+	pixels_in_painted = _count_pixels_in_binarized_images(image_painted)
+
+	iou = image_intersection/image_union
+	border_error = image_intersection/pixels_in_original
+
+	metric = np.absolute(iou-border_error)
+
+	return metric
+
+def _count_pixels_in_binarized_images(image):
+
+	_ , image_binarized = cv2.threshold(image, 170, 255, cv2.THRESH_BINARY)
 	mask = image_binarized == 255
-	return np.sum(mask)
+	num_pixels = np.sum(mask)
+
+	return num_pixels
+
+def _get_overlap(image_A,image_B):
+
+	image_intersection = cv2.bitwise_and(image_A,image_B)
+	overlap = _count_pixels_in_binarized_images(image_intersection)
+
+	return overlap
+
+def _get_union(image_A,image_B):
+
+	image_intersection = cv2.bitwise_or(image_A,image_B)
+	union = _count_pixels_in_binarized_images(image_intersection)
+
+	return union
+
 
 def _get_draw_image():
 	images = os.listdir(os.path.join('Imagenes','Dibujos'))
@@ -68,15 +107,29 @@ def _paint_menu(window,colors):
 
 	return window
 
+def _paint_counter(window,time_elapsed):
+
+	window = cv2.rectangle(window, (570,6), (620,26), (255,255,255), -1)
+	cv2.putText(window, str(time_elapsed), (575, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
+
+	return window
+
+def _paint_results(window,score):
+	cv2.putText(window, "FELICIDADES", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "TU PUNTAJE", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "ES", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, str(np.round(score,4)*100), (10, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+
+
 def _paint_rules(window,colors,idx,brushes,brush_idx):
 
 	cv2.putText(window, "Parate sobre el", (19, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 1, cv2.LINE_AA)
 	cv2.putText(window, "color o la brocha", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 1, cv2.LINE_AA)
 	cv2.putText(window, "que desees", (35, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 1, cv2.LINE_AA)
 
-	cv2.putText(window, "Color Seleccionado", (160, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
+	cv2.putText(window, "Color Seleccionado", (160, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
 	window = cv2.rectangle(window, (312,6), (350,26), colors[idx], -1)
-	cv2.putText(window, "Brocha Seleccionada", (360, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
+	cv2.putText(window, "Brocha Seleccionada", (360, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
 	window = cv2.rectangle(window, (525,6), (550,26), (255,255,255), -1)
 	cv2.putText(window, str(brushes[brush_idx]), (530, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
 
@@ -87,13 +140,17 @@ brushes = [5,8,30]
 color_idx = 0
 brush_idx = 0
 
-paintWindow = np.zeros((471,636,3)) + 255
 paintWindow = _get_draw_image()
 paintWindow = _paint_menu(paintWindow,colors)
 paintWindow = _paint_rules(paintWindow,colors,color_idx,brushes,brush_idx)
-cv2.namedWindow('Paint', cv2.WINDOW_AUTOSIZE)
 
 cap = cv2.VideoCapture(0)
+time_to_win = 50
+
+_get_border_image(paintWindow, 'unpainted_image')
+
+hidden_layer = np.zeros(PAINT_WINDOW_SHAPE)
+hidden_layer = cv2.resize(hidden_layer,PAINT_WINDOW_SHAPE)
 
 while(True):
     # Capture frame-by-frame
@@ -108,6 +165,7 @@ while(True):
     		frame = cv2.rectangle(frame,object_point_one,object_point_two,colors[color_idx],4)
 	    	frame = cv2.circle(frame, object_half_point, brushes[brush_idx], colors[color_idx], -1)
 	    	cv2.circle(paintWindow, object_half_point, brushes[brush_idx], colors[color_idx], -1)
+	    	cv2.circle(hidden_layer, object_half_point, brushes[brush_idx], colors[color_idx], -1)
     	
     	else:
 
@@ -134,17 +192,25 @@ while(True):
     frame = delimit_screen(frame)
     frame = _paint_menu(frame,colors)
     paintWindow = _paint_rules(paintWindow,colors,color_idx,brushes,brush_idx)
+    paintWindow = _paint_counter(paintWindow,time_to_win)
 
     cv2.imshow('frame',frame)
     cv2.imshow("Paint", paintWindow)
-    if cv2.waitKey(20) & 0xFF == ord('q'):
-    	_get_border_image(paint_window=frame, image_name='frame')
-    	_get_border_image(paint_window=paintWindow, image_name='paint')
+    if (cv2.waitKey(20) & 0xFF == ord('q')) or time_to_win <= 0:
+    	_get_border_image(paint_window=hidden_layer, image_name='painted_image')
     	break
 
+    time_to_win -= 1
 
-contador_pixeles = _pixel_counter()
-print(contador_pixeles)
+
+cv2.destroyAllWindows()
+
+score = _compute_score()
+results_window = _get_draw_image()
+_paint_results(results_window,score)
+cv2.imshow('RESULTADOS',results_window)
+cv2.waitKey()
+
 # When everything done, release the capture
 cap.release()
 cv2.destroyAllWindows()
