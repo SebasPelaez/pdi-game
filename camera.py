@@ -7,8 +7,14 @@ MENU_LIMIT_AREA = 150
 PAINT_WINDOW_SHAPE = (620,426)
 
 def _get_border_image(paint_window, image_name):
-	image_path = os.path.join('Imagenes','Generadas','{}.jpg'.format(image_name))
-	image_border_path = os.path.join('Imagenes','Generadas','{}_border.jpg'.format(image_name))
+
+	folder_images_path = os.path.join('Imagenes','Generadas')
+
+	if not os.path.exists(folder_images_path):
+	    os.makedirs(folder_images_path)
+
+	image_path = os.path.join(folder_images_path,'{}.jpg'.format(image_name))
+	image_border_path = os.path.join(folder_images_path,'{}_border.jpg'.format(image_name))
 	
 	cv2.imwrite(image_path,paint_window)
 	image = cv2.imread(image_path,1)
