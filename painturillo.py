@@ -350,6 +350,6 @@ if __name__ == '__main__':
 	paint_window_shape = (620,426)
 	colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (0, 255, 255)]
 	brushes = [5,10,15]
-	time_to_win = 500
+	time_to_win = 200
 
 	play_game(menu_limit_area,paint_window_shape,colors,brushes,time_to_win)
