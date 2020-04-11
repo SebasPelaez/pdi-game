@@ -28,25 +28,25 @@ La estructura anterior contiene la siguiente información
 
 Para usar y probar el juego se deben seguir los siguientes pasos.
 
-* 1) **Clonar el repositorio:** En una consola ejecutamos los siguientes comandos.
+1) **Clonar el repositorio:** En una consola ejecutamos los siguientes comandos.
 ```
 git clone https://github.com/SebasPelaez/pdi-game.git
 cd pdi-game
 ```
 
-* 2) **Crear ambiente de python:** Para crear y activar el ambiente con el cual correra nuestro proyecto debemos seguir los siguientes comandos
+2) **Crear ambiente de python:** Para crear y activar el ambiente con el cual correra nuestro proyecto debemos seguir los siguientes comandos
 ```
 pip install virtualenv
 virtualenv nombre_de_tu_entorno
 nombre_de_tu_entorno\Scripts\activate
 ```
 
-* 3) **Instalar todos los paquetes:** Para que el juego funcione correctamente se deben instalar todas las librerias del archivo _requirements.txt_
+3) **Instalar todos los paquetes:** Para que el juego funcione correctamente se deben instalar todas las librerias del archivo _requirements.txt_
 ```
 pip install -r requirements.txt
 ```
 
-* 4) **Ejecutar el juego:** Luego de correr correctamente los pasos anteriores, debemos ejecutar el siguiente comando para poder jugar.
+4) **Ejecutar el juego:** Luego de correr correctamente los pasos anteriores, debemos ejecutar el siguiente comando para poder jugar.
 ```
 python painturillo.py
 ```
