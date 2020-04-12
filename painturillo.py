@@ -7,6 +7,26 @@ import os
 
 import ObjectUtils
 
+def _get_image_result():
+	"""
+    Lee dos imágenes, la imagen original y la imagen después de ser pintada y se 
+	les asigna la misma dimensión. Posteriormente, se usa la operación Bitwise_or,
+	donde su salida será 255 cuando al menos un pixel de las imagenes sea 255.
+	Finalmente retorna una imagen que identifica cuales bordes de la imagen original 
+	tocó el usuario con el pincel junto con su respectivo color. 
+    """
+	image_original_path = os.path.join('Imagenes','Generadas','unpainted_image.jpg')
+	image_painted_path = os.path.join('Imagenes','Generadas','painted_image2.jpg')
+	imagen_original = cv2.imread(image_original_path)
+	imagen_painted = cv2.imread(image_painted_path)
+
+	imagen_original = imagen_original[30:,150:]
+	imagen_painted = imagen_painted[30:,150:]
+
+	image_OR = cv2.bitwise_or(imagen_original,imagen_painted)
+
+	return image_OR
+
 def _get_border_image(paint_window, image_name):
 	"""
 	Esta función extrae por medio del método Canny los bordes de una imágen. Para 
@@ -201,10 +221,18 @@ def _paint_results(window,score):
 		- window: Pantalla sobre la cual se quiere mostrar los resultados.
 		- score: Puntaje obtenido.
 	"""
-	cv2.putText(window, "FELICIDADES", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-	cv2.putText(window, "TU PUNTAJE", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-	cv2.putText(window, "ES", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-	cv2.putText(window, str(np.round(score,4)*100), (10, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "PARTICIPASTE EN", (2, 31), cv2.FONT_HERSHEY_TRIPLEX, 0.9, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "P", (273, 31), cv2.FONT_HERSHEY_TRIPLEX, 0.9, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "A", (285, 31), cv2.FONT_HERSHEY_TRIPLEX, 1, (255, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, " IN", (290, 31), cv2.FONT_HERSHEY_TRIPLEX, 0.9, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "T", (334, 31), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "UR", (353, 31), cv2.FONT_HERSHEY_TRIPLEX, 0.9, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, " I", (375, 31), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 0, 255), 1, cv2.LINE_AA)
+	cv2.putText(window, "LL", (400, 31), cv2.FONT_HERSHEY_TRIPLEX, 0.9, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "O", (433, 31), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 255), 1, cv2.LINE_AA)
+	window = cv2.line(window, (0,375), (470,375), (0,0,0), 2)
+	cv2.putText(window, " PUNTUACION TOTAL :", (5,391), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2, cv2.LINE_AA)
+	cv2.putText(window, str(np.round(score,4)*100), (165, 393), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
 
 def _paint_rules(window,colors,idx,brushes,brush_idx):
 	"""
@@ -276,7 +304,7 @@ def play_game(menu_limit_area,paint_window_shape,colors,brushes,time_to_win):
 	paintWindow = _paint_rules(paintWindow,colors,color_idx,brushes,brush_idx)
 	_get_border_image(paintWindow, 'unpainted_image')
 
-	hidden_layer = np.zeros(paint_window_shape)
+	hidden_layer = np.zeros((471,636,3)) + 255
 	hidden_layer = cv2.resize(hidden_layer,paint_window_shape)
 
 	cap = cv2.VideoCapture(0)
@@ -326,6 +354,7 @@ def play_game(menu_limit_area,paint_window_shape,colors,brushes,time_to_win):
 	    cv2.imshow("Paint", paintWindow)
 	    if (cv2.waitKey(20) & 0xFF == ord('q')) or time_to_win <= 0:
 	    	_get_border_image(paint_window=hidden_layer, image_name='painted_image')
+	    	_get_border_image(paint_window=paintWindow, image_name='painted_image2')
 	    	break
 
 	    time_to_win -= 1
@@ -334,7 +363,7 @@ def play_game(menu_limit_area,paint_window_shape,colors,brushes,time_to_win):
 	cv2.destroyAllWindows()
 
 	score = _compute_score() * 100
-	results_window = _get_draw_image()
+	results_window = _get_image_result()
 	_paint_results(results_window,score)
 	cv2.imshow('RESULTADOS',results_window)
 	
