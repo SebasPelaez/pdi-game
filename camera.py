@@ -6,8 +6,28 @@ import os
 MENU_LIMIT_AREA = 150
 PAINT_WINDOW_SHAPE = (620,426)
 
-def _get_border_image(paint_window, image_name):
 
+def _get_image_result():
+	"""
+    Lee dos imágenes, la imagen original y la imagen después de ser pintada y se 
+	les asigna la misma dimensión. Posteriormente, se usa la operación Bitwise_or,
+	donde su salida será 255 cuando al menos un pixel de las imagenes sea 255.
+	Finalmente retorna una imagen que identifica cuales bordes de la imagen original 
+	tocó el usuario con el pincel junto con su respectivo color. 
+    """
+	image_original_path = os.path.join('Imagenes','Generadas','unpainted_image.jpg')
+	image_painted_path = os.path.join('Imagenes','Generadas','painted_image2.jpg')
+	imagen_original = cv2.imread(image_original_path)
+	imagen_painted = cv2.imread(image_painted_path)
+
+	imagen_original = imagen_original[30:,150:]
+	imagen_painted = imagen_painted[30:,150:]
+
+	OR = cv2.bitwise_or(imagen_original,imagen_painted)
+	return OR
+	
+def _get_border_image(paint_window, image_name):
+	
 	folder_images_path = os.path.join('Imagenes','Generadas')
 
 	if not os.path.exists(folder_images_path):
@@ -15,12 +35,10 @@ def _get_border_image(paint_window, image_name):
 
 	image_path = os.path.join(folder_images_path,'{}.jpg'.format(image_name))
 	image_border_path = os.path.join(folder_images_path,'{}_border.jpg'.format(image_name))
-	
 	cv2.imwrite(image_path,paint_window)
 	image = cv2.imread(image_path,1)
-	
-	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-	border = cv2.Canny(gray,100,200)
+	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #transformar la imagen de BGR a escala de grises
+	border = cv2.Canny(gray,100,200) #implementación del algoritmo canny (umbral bajo, umbral alto)
 	
 	cv2.imwrite(image_border_path,border)
 	
@@ -96,8 +114,8 @@ def _paint_menu(window,colors):
 	window = cv2.rectangle(window, (10,162), (140,202), colors[2], -1)
 	window = cv2.rectangle(window, (10,209), (140,249), colors[3], -1)
 
-	window = cv2.circle(window, (75,275), 5, (0,0,0), -1)
-	window = cv2.circle(window, (75,315), 8, (0,0,0), -1)
+	window = cv2.circle(window, (75,275), 10, (0,0,0), -1)
+	window = cv2.circle(window, (75,315), 20, (0,0,0), -1)
 	window = cv2.circle(window, (75,375), 30, (0,0,0), -1)
 
 	cv2.putText(window, "AZUL", (55, 92), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
@@ -115,10 +133,18 @@ def _paint_counter(window,time_elapsed):
 	return window
 
 def _paint_results(window,score):
-	cv2.putText(window, "FELICIDADES", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-	cv2.putText(window, "TU PUNTAJE", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-	cv2.putText(window, "ES", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-	cv2.putText(window, str(np.round(score,4)*100), (10, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "PARTICIPASTE EN", (2, 31), cv2.FONT_HERSHEY_TRIPLEX, 0.9, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "P", (273, 31), cv2.FONT_HERSHEY_TRIPLEX, 0.9, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "A", (285, 31), cv2.FONT_HERSHEY_TRIPLEX, 1, (255, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, " IN", (290, 31), cv2.FONT_HERSHEY_TRIPLEX, 0.9, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "T", (334, 31), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "UR", (353, 31), cv2.FONT_HERSHEY_TRIPLEX, 0.9, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, " I", (375, 31), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 0, 255), 1, cv2.LINE_AA)
+	cv2.putText(window, "LL", (400, 31), cv2.FONT_HERSHEY_TRIPLEX, 0.9, (0, 0, 0), 1, cv2.LINE_AA)
+	cv2.putText(window, "O", (433, 31), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 255), 1, cv2.LINE_AA)
+	window = cv2.line(window, (0,375), (470,375), (0,0,0), 2)
+	cv2.putText(window, " PUNTUACION TOTAL :", (5,391), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2, cv2.LINE_AA)
+	cv2.putText(window, str(np.round(score,4)*100), (165, 393), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
 
 
 def _paint_rules(window,colors,idx,brushes,brush_idx):
@@ -136,7 +162,7 @@ def _paint_rules(window,colors,idx,brushes,brush_idx):
 	return window
 
 colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (0, 255, 255)]
-brushes = [5,8,30]
+brushes = [10,20,30]
 color_idx = 0
 brush_idx = 0
 
@@ -145,11 +171,11 @@ paintWindow = _paint_menu(paintWindow,colors)
 paintWindow = _paint_rules(paintWindow,colors,color_idx,brushes,brush_idx)
 
 cap = cv2.VideoCapture(0)
-time_to_win = 50
+time_to_win = 200
 
 _get_border_image(paintWindow, 'unpainted_image')
 
-hidden_layer = np.zeros(PAINT_WINDOW_SHAPE)
+hidden_layer = np.zeros((471,636,3)) + 255
 hidden_layer = cv2.resize(hidden_layer,PAINT_WINDOW_SHAPE)
 
 while(True):
@@ -165,7 +191,7 @@ while(True):
     		frame = cv2.rectangle(frame,object_point_one,object_point_two,colors[color_idx],4)
 	    	frame = cv2.circle(frame, object_half_point, brushes[brush_idx], colors[color_idx], -1)
 	    	cv2.circle(paintWindow, object_half_point, brushes[brush_idx], colors[color_idx], -1)
-	    	cv2.circle(hidden_layer, object_half_point, brushes[brush_idx], colors[color_idx], -1)
+	    	hidden_layer=cv2.circle(hidden_layer, object_half_point, brushes[brush_idx], colors[color_idx], -1)
     	
     	else:
 
@@ -197,16 +223,15 @@ while(True):
     cv2.imshow('frame',frame)
     cv2.imshow("Paint", paintWindow)
     if (cv2.waitKey(20) & 0xFF == ord('q')) or time_to_win <= 0:
-    	_get_border_image(paint_window=hidden_layer, image_name='painted_image')
+    	_get_border_image(paint_window=hidden_layer, image_name='painted_image'),_get_border_image(paint_window=paintWindow, image_name='painted_image2')
     	break
 
     time_to_win -= 1
 
-
 cv2.destroyAllWindows()
 
 score = _compute_score()
-results_window = _get_draw_image()
+results_window = _get_image_result()
 _paint_results(results_window,score)
 cv2.imshow('RESULTADOS',results_window)
 cv2.waitKey()
